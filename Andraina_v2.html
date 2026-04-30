@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promotion Andraina — Base de Données</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap');
+
+  :root {
+    --navy: #0d1b3e;
+    --navy2: #16285a;
+    --gold: #c9a84c;
+    --gold2: #e6c96b;
+    --gold-light: #f5e6b8;
+    --cream: #faf8f2;
+    --white: #ffffff;
+    --red: #b22222;
+    --green: #1a6b3a;
+    --text-dark: #1a1a2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  .page-header {
+    background: var(--navy);
+    padding: 0;
+    border-bottom: 3px solid var(--gold);
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .logo-wrap img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 12px rgba(201,168,76,0.5));
+  }
+
+  .header-text { flex: 1; }
+
+  .header-pretitle {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .header-title {
+    font-family: 'Cinzel', serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--gold2);
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+  }
+
+  .header-subtitle {
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: rgba(229,201,107,0.75);
+    margin-top: 6px;
+    letter-spacing: 0.03em;
+  }
+
+  .header-motto {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-top: 10px;
+  }
+
+  .header-role-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .badge-admin { background: var(--gold); color: var(--navy); }
+  .badge-student { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.3); }
+
+  .gold-band { background: var(--gold); height: 4px; }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 40px 60px;
+  }
+
+  /* ---- LOCK SCREEN ---- */
+  #lock-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    gap: 20px;
+  }
+
+  .lock-card {
+    background: var(--navy);
+    border: 1.5px solid var(--gold);
+    border-radius: 12px;
+    padding: 48px 56px;
+    text-align: center;
+    max-width: 440px;
+    width: 100%;
+  }
+
+  .lock-icon { font-size: 48px; margin-bottom: 16px; color: var(--gold2); display: block; }
+  .lock-title { font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold2); margin-bottom: 8px; }
+  .lock-sub { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 24px; line-height: 1.6; }
+
+  .lock-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(201,168,76,0.3);
+  }
+
+  .lock-tab {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    border: none;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+
+  .lock-tab.active {
+    background: var(--gold);
+    color: var(--navy);
+    font-weight: 700;
+  }
+
+  .lock-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 8px;
+    color: white;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    outline: none;
+    text-align: center;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+
+  .lock-input:focus { border-color: var(--gold); }
+  .lock-input.shake { animation: shake 0.4s ease; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-6px); }
+    40%,80% { transform: translateX(6px); }
+  }
+
+  .lock-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .lock-btn:hover { background: var(--gold2); }
+  .lock-btn:active { transform: scale(0.98); }
+  .lock-error { color: #e55; font-size: 13px; margin-top: 10px; height: 18px; }
+
+  /* ---- APP ---- */
+  #app { display: none; }
+
+  /* ---- STATS ---- */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .stat {
+    background: var(--navy);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .stat-value { font-family: 'Cinzel', serif; font-size: 22px; color: var(--white); line-height: 1; }
+  .stat-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+
+  /* ---- COST BANNER ---- */
+  .cost-banner {
+    background: var(--navy2);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 22px;
+    display: flex;
+    gap: 0;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .cost-banner-title { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.12em; color: var(--gold2); margin-right: 28px; text-transform: uppercase; }
+  .cost-item { font-size: 12px; color: rgba(255,255,255,0.55); margin-right: 22px; }
+  .cost-item strong { color: var(--gold2); font-weight: 600; }
+
+  /* ---- EDIT SECTIONS (admin only) ---- */
+  .admin-only { display: none; }
+
+  .edit-section {
+    background: var(--navy);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+  }
+
+  .edit-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .edit-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(201,168,76,0.2); }
+
+  .edit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .edit-field label { display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+  .edit-field input {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 7px;
+    color: var(--white);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .edit-field input:focus { border-color: var(--gold); }
+
+  .btn-apply {
+    padding: 10px 22px;
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 7px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .btn-apply:hover { background: var(--gold2); }
+
+  /* Activities manager */
+  .activities-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .activity-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--gold2);
+  }
+
+  .activity-tag button {
+    background: none;
+    border: none;
+    color: #e55;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .add-activity-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .add-activity-row input {
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 7px;
+    color: var(--white);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    outline: none;
+  }
+  .add-activity-row input:focus { border-color: var(--gold); }
+  .add-activity-row input::placeholder { color: rgba(255,255,255,0.3); }
+
+  .btn-add-act {
+    padding: 8px 16px;
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 7px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-add-act:hover { background: var(--gold2); }
+
+  /* ---- SEARCH ROW ---- */
+  .search-row { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; }
+  .search-wrap { flex: 1; position: relative; }
+  .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 15px; pointer-events: none; }
+  .search-input { width: 100%; padding: 11px 14px 11px 38px; background: var(--navy2); border: 1px solid rgba(201,168,76,0.3); border-radius: 8px; color: var(--white); font-family: 'Source Sans 3', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .search-input:focus { border-color: var(--gold); }
+  .search-input::placeholder { color: rgba(255,255,255,0.3); }
+  .filter-select { padding: 11px 14px; background: var(--navy2); border: 1px solid rgba(201,168,76,0.3); border-radius: 8px; color: var(--white); font-family: 'Source Sans 3', sans-serif; font-size: 13px; outline: none; cursor: pointer; }
+  .btn-add { padding: 11px 20px; background: var(--navy); border: 1px solid var(--gold); border-radius: 8px; color: var(--gold2); font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; letter-spacing: 0.06em; transition: background 0.2s; }
+  .btn-add:hover { background: rgba(201,168,76,0.15); }
+  .result-count { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+
+  /* ---- TABLE ---- */
+  .table-wrap { border: 1px solid rgba(201,168,76,0.2); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  thead { background: var(--navy); }
+  th { text-align: left; padding: 12px 14px; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid rgba(201,168,76,0.25); }
+  td { padding: 10px 14px; border-bottom: 1px solid rgba(13,27,62,0.08); color: var(--text-dark); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: white; }
+  tr:nth-child(odd) td { background: #f7f5ef; }
+  tr:last-child td { border-bottom: none; }
+  tr.data-row:hover td { background: #eee8d4; cursor: pointer; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .badge { display: inline-block; font-size: 10px; padding: 3px 9px; border-radius: 5px; font-weight: 600; letter-spacing: 0.05em; }
+  .badge-ok { background: #d4edda; color: #155724; }
+  .badge-due { background: #f8d7da; color: #721c24; }
+  .badge-partial { background: #fff3cd; color: #856404; }
+  .val-neg { color: #8b0000; font-weight: 600; }
+  .val-pos { color: #1a6b3a; font-weight: 600; }
+  .expand-btn { background: none; border: none; cursor: pointer; color: var(--gold); font-size: 16px; padding: 0; line-height: 1; }
+
+  /* ---- DETAIL ROW ---- */
+  .detail-row { display: none; }
+  .detail-row td { background: #f0ead8 !important; padding: 16px 20px; white-space: normal; }
+
+  .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .detail-card { background: white; border: 1px solid rgba(201,168,76,0.3); border-radius: 8px; padding: 10px 14px; }
+  .dc-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(0,0,0,0.45); margin-bottom: 4px; }
+  .dc-val { font-size: 16px; font-weight: 600; color: var(--text-dark); }
+  .dc-sub { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 2px; }
+
+  .edit-inline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: white; border: 1px solid rgba(201,168,76,0.3); border-radius: 8px; padding: 12px 14px; }
+  .edit-inline label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(0,0,0,0.5); margin-right: 2px; }
+  .edit-inline input { width: 110px; padding: 7px 10px; border: 1px solid rgba(201,168,76,0.4); border-radius: 6px; font-size: 13px; background: #faf8f2; color: var(--text-dark); outline: none; }
+  .edit-inline input.name-input { width: 240px; }
+  .edit-inline input.num-input { width: 80px; }
+
+  .btn-save { padding: 7px 16px; background: var(--navy); color: var(--gold2); border: 1px solid var(--gold); border-radius: 6px; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; cursor: pointer; letter-spacing: 0.07em; transition: background 0.2s; }
+  .btn-save:hover { background: var(--navy2); }
+  .btn-delete { padding: 7px 14px; background: transparent; color: #c00; border: 1px solid #c00; border-radius: 6px; font-family: 'Cinzel', serif; font-size: 11px; cursor: pointer; transition: background 0.2s; }
+  .btn-delete:hover { background: #fff0f0; }
+
+  /* ---- MODAL ---- */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--cream); border: 2px solid var(--gold); border-radius: 14px; padding: 36px 40px; width: 520px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-family: 'Cinzel', serif; font-size: 18px; color: var(--navy); margin-bottom: 24px; letter-spacing: 0.04em; }
+  .form-field { margin-bottom: 16px; }
+  .form-field label { display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(0,0,0,0.5); margin-bottom: 6px; }
+  .form-field input { width: 100%; padding: 11px 13px; background: white; border: 1px solid rgba(0,0,0,0.2); border-radius: 7px; font-family: 'Source Sans 3', sans-serif; font-size: 14px; color: var(--text-dark); outline: none; transition: border-color 0.2s; }
+  .form-field input:focus { border-color: var(--gold); }
+  .modal-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; }
+  .btn-cancel { padding: 11px 20px; background: transparent; color: rgba(0,0,0,0.5); border: 1px solid rgba(0,0,0,0.2); border-radius: 7px; font-family: 'Cinzel', serif; font-size: 12px; cursor: pointer; }
+  .btn-confirm { padding: 11px 24px; background: var(--navy); color: var(--gold2); border: 1px solid var(--gold); border-radius: 7px; font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; letter-spacing: 0.07em; cursor: pointer; }
+  .btn-confirm:hover { background: var(--navy2); }
+
+  /* ---- FOOTER ---- */
+  .page-footer { background: var(--navy); border-top: 2px solid var(--gold); padding: 20px 40px; text-align: center; }
+  .footer-text { font-family: 'Libre Baskerville', serif; font-style: italic; font-size: 12px; color: rgba(201,168,76,0.55); letter-spacing: 0.06em; }
+
+  @media (max-width: 700px) {
+    .header-inner { flex-direction: column; padding: 24px 20px; text-align: center; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .edit-grid { grid-template-columns: 1fr 1fr; }
+    .detail-grid { grid-template-columns: 1fr 1fr; }
+    .container { padding: 20px; }
+    th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-inner">
+    <div class="logo-wrap"><img id="logo-img" alt="Logo Promotion Andraina" /></div>
+    <div class="header-text">
+      <p class="header-pretitle">Faculté d'Économie, de Gestion et de Sociologie · Université d'Antananarivo</p>
+      <h1 class="header-title">Promotion Andraina</h1>
+      <p class="header-subtitle">Andry Rahatrizay Iankinan'ny Ampitso · Mention Économie</p>
+      <p class="header-motto" id="header-motto">Base de Données Officielle · Comptes Personnels &amp; Sortie de Promotion</p>
+      <span class="header-role-badge" id="role-badge" style="display:none"></span>
+    </div>
+  </div>
+</div>
+<div class="gold-band"></div>
+
+<!-- LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <span class="lock-icon">🔒</span>
+    <h2 class="lock-title">Accès Sécurisé</h2>
+    <p class="lock-sub">Choisissez votre type d'accès et entrez le mot de passe correspondant.</p>
+
+    <div class="lock-tabs">
+      <button class="lock-tab active" id="tab-admin" onclick="selectTab('admin')">🛡 Administrateur</button>
+      <button class="lock-tab" id="tab-student" onclick="selectTab('student')">🎓 Étudiant</button>
+    </div>
+
+    <input type="password" class="lock-input" id="pwd-input" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')checkPwd()" />
+    <button class="lock-btn" onclick="checkPwd()">Accéder</button>
+    <div class="lock-error" id="pwd-error"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="container">
+
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- EDIT COSTS (admin only) -->
+    <div class="edit-section admin-only" id="section-costs">
+      <div class="edit-section-title">Modifier les coûts de sortie</div>
+      <div class="edit-grid">
+        <div class="edit-field"><label>Coût Matinée (Ar)</label><input type="number" id="e-mat" value="51975" /></div>
+        <div class="edit-field"><label>Coût Soirée Fixe (Ar)</label><input type="number" id="e-soir" value="54770" /></div>
+        <div class="edit-field"><label>Coût Soirée Variable (Ar)</label><input type="number" id="e-var" value="114000" /></div>
+        <button class="btn-apply" onclick="applyCosts()">Appliquer</button>
+      </div>
+    </div>
+
+    <!-- MANAGE ACTIVITIES (admin only) -->
+    <div class="edit-section admin-only" id="section-activities">
+      <div class="edit-section-title">Gérer les activités / sources de revenus</div>
+      <div class="activities-grid" id="activities-grid"></div>
+      <div class="add-activity-row">
+        <input type="text" id="new-act-name" placeholder="Nom de l'activité (ex: Tombola, Vente de t-shirts...)" />
+        <button class="btn-add-act" onclick="addActivity()">+ Ajouter</button>
+      </div>
+    </div>
+
+    <div class="cost-banner" id="cost-banner"></div>
+
+    <div class="search-row">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="search" placeholder="Rechercher un nom ou un numéro..." oninput="filterTable()" />
+      </div>
+      <select class="filter-select" id="filter-status" onchange="filterTable()">
+        <option value="all">Tous les statuts</option>
+        <option value="ok">Couvert</option>
+        <option value="due">Reste à payer</option>
+      </select>
+      <button class="btn-add admin-only" id="btn-add-student" onclick="openAddModal()">+ Ajouter</button>
+    </div>
+    <div class="result-count" id="result-count"></div>
+
+    <div class="table-wrap">
+      <table id="main-table">
+        <thead>
+          <tr id="table-head">
+            <th style="width:34px"></th>
+            <th style="width:42px">#</th>
+            <th>Nom et Prénoms</th>
+            <th class="num" style="width:100px">Compte (Ar)</th>
+            <th class="num" style="width:90px">Coût Sortie</th>
+            <th class="num" style="width:100px">Reste (Ar)</th>
+            <th style="width:76px">Statut</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD STUDENT MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h2 class="modal-title">Ajouter un Étudiant</h2>
+    <div class="form-field"><label>Numéro</label><input type="number" id="m-num" placeholder="ex: 215" /></div>
+    <div class="form-field"><label>Nom et Prénoms</label><input type="text" id="m-nom" placeholder="NOM Prénom" /></div>
+    <div class="form-field"><label>Cotisation (Ar)</label><input type="number" id="m-cot" value="0" /></div>
+    <div id="m-activities-fields"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">Annuler</button>
+      <button class="btn-confirm" onclick="addStudent()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-footer">
+  <p class="footer-text">Promotion Andraina · Faculté d'Économie, de Gestion et de Sociologie · Université d'Antananarivo</p>
+</div>
+
+<script>
+// ===================== LOGO =====================
+const LOGO_B64 = "LOGO_PLACEHOLDER";
+document.getElementById('logo-img').src = 'data:image/jpeg;base64,' + LOGO_B64;
+
+// ===================== PASSWORDS =====================
+const PWD_ADMIN = "andraina2025";
+const PWD_STUDENT = "promo2025";
+
+// ===================== STATE =====================
+let currentRole = null; // 'admin' or 'student'
+let selectedTab = 'admin';
+
+// Activities: [{id, name}]
+let activities = [
+  { id: 'cotisation', name: 'Cotisation', fixed: true },
+  { id: 'cupcake', name: 'Cupcake / Ventes', fixed: false }
+];
+
+let COST_MAT = 51975;
+let COST_SOIR = 54770;
+let COST_VAR = 114000;
+
+function getTotalCost() { return COST_MAT + COST_SOIR + COST_VAR; }
+function fmt(n) { return Math.round(n).toLocaleString('fr-FR'); }
+
+// ===================== RAW DATA =====================
+// [num, nom, cotisation, cupcake]
+const rawData = [
+[1,'ANDRIANARISON Diarintsoa Ny Mahery',0,6000],[2,'ANDRIANJARY Tommy',0,0],[3,'ANDRY TAFITASOA Ny Zo Farasoa Rose De Lilie',0,0],[4,'FANIRIKO Serge Elie Elf',0,0],[5,'MIRADOARIMANANA Fanantenana Fidéline',0,6000],[6,'NOMENJANAHARY Fenotiana Olivier Prince',1500,6000],[7,'RABARIVELONJATOVO ZERIARILALA Myrrh Fehizoro',0,6000],[8,'RABEMANANJARA Andrianina Evah',0,6000],[9,'RADAFISOLO Andrianarijaona Rota Naftaly',0,0],[10,"RAKOTOARIMANANA Andoniaina Finaritra Andrian'Harifidy",1500,6000],[11,'RAKOTOMALALA A. J. Gabriel',0,0],[13,'RAVOLOLONIAINA Malalasoa',0,0],[15,'FALINIRINA Mandimbisoa',0,0],[17,'RAJAONARIVO D. N. Karen',0,0],[18,'RANDY B. Nazario',0,0],[19,'RASOLOFOMANANA A. Julie',0,6000],[20,'ANDRIAMANALINARIVO T. Tsilavina',0,6000],[23,'ANDRIAMBOLOLONA R. Ny Aina D',0,4000],[24,'ANDRIAMBOLONIAINA J. M. Victorine',1500,6000],[25,'ANDRIAMILAZA S. Sarah',0,6000],[26,'ANDRIAMITANTSOA J. Francki',1500,12000],[27,'ANDRIAMIZAKANIRINA Asiniana H',0,4000],[28,'ANDRIANALIMANANA L. Josia',1500,6000],[30,'ANDRIANARIJAONA R. Ambinintsoa',0,0],[31,'ANDRIANARILALA Rinah E.',1500,6000],[33,'ANDRIANASOLO Andy Ny Aina',0,6000],[34,'ANDRIANASOLO Severina M',0,6000],[35,'ANDRIANIAINA M. Heritiana',0,0],[36,'ANDRIANIAINA Toky F',0,0],[37,'ANDRIANJATOVO T. Fanekena',0,6000],[41,'FALY M. Heriniaina',0,0],[42,'FANJANIRINAHASPIERA R. Fitia',0,6000],[43,'HAINGONAVALONA Tolotra',0,6000],[44,'HAJAMALALA S. N. Lilie',0,0],[45,'HAJANOMENA V. Mylenah',0,30000],[46,'HENINTSOA M. Joêllà',0,12000],[47,'HERIMAMPIONONA L. Sambatra',0,0],[49,'HERINIAINA',0,4000],[50,'HERIZO',0,0],[52,'JAOZANDRY EDDY Francko',0,4000],[54,'MIHARINTSOA T. M. Ange',0,2000],[55,'NANTENAINASOA M. Clerina',1500,6000],[57,'NOMANJANAHARY T. Nambinina',0,6000],[58,'NONANA M. Julie',13500,4000],[60,'RAFANOMEZANTSOA Toky N',0,0],[61,'RAFARAMALALA Tsilavina',4500,16000],[62,'RAHAJANIAINA Tsiory F',0,10000],[63,'RAHARINIRINA Annie Ny Aina',1500,0],[64,'RAHARINIRINA M. Mendrika',0,92000],[66,'RAHERIMANANA L. Nathal',0,0],[67,'RAHERIMANJAKA L. Joseph',0,6000],[70,'RAJOELIARIVONY A. Mendrika',7500,6000],[71,'RAKOTOARIMANANA F. Fehizoro',0,0],[72,'RAKOTOARISOA Lariah A',0,0],[74,'RAKOTOARIVO M. Tsiory',1500,0],[75,'RAKOTOARIVONY K. Ny Aina',1500,0],[76,'RAKOTOARIMALALA Tsiory Ny Aina',0,10000],[77,'RAKOTOMAMONJY N. Ambina',0,6000],[79,'RAKOTOMANDIMBY S. Francia',4500,6000],[83,'RALAMBOMANANA Marie Ange C',0,12000],[85,'RAMAHERISOA R. H. Sylvia H',0,6000],[87,'RAMANDIMBISOA Harivolana F P',1500,6000],[88,'RAMANGAHARIVELO Jessica M',1500,0],[89,'RAMANIRAKA Sarobidy F',4500,6000],[90,'RAMAROVONY Diary F',1500,6000],[92,'RAMIANDRISOA Intiaka T',0,0],[94,'RAMIHARIMAMONJY Kantosoa N',0,10000],[97,'RANAIVOARIZAKA M. Priscilla',0,0],[98,'RANDRIAMAHENINA R. Aina',1500,4000],[99,'RANDRIAMALALA T. Olivier',0,0],[100,'RANDRIANARIVELO N. N. Franckie',0,8000],[101,'RANDRIAMANARIVO F. Cinthy',0,0],[102,'RANDRIAMBOLOLONA T. M. Sergio',1500,0],[103,'RANDRIAMIFIDITSEHENO Nekena',0,0],[104,'RANDRIAMIRADO F. F Fitiavana',0,2000],[105,'RANDRIAMPINOANA T. Mendrika',0,0],[106,'RANDRIANAIVO R. Niony',0,6000],[107,'RANDRIANANTENAINA M. J. Christian',0,0],[110,'RANDRIANARISOA Kanto Ny Aina M',1500,6000],[111,'RANDRIANARISON R. J. Christianah',0,0],[112,'RANDRIANIAINA M. Pascaline',1500,16000],[113,'RANDRIANIRINA R. Nardin',3000,0],[114,'RANDRIARINJATO T. Eddie',1500,36000],[115,'RANOELISON H. Hobisoa',1500,0],[116,'RASOANIRINA Zo L. Erica',0,6000],[118,'RASOLONIRINA Ferdinand',0,0],[120,'RATEFIARIMANANA Tendry L',0,4000],[121,'RATOETRARIVO Sitraka N',0,6000],[124,'RATRIMIHASINA D. M. Erica',0,12000],[126,'RAVAOARIMANANA F. Andrea',1500,6000],[127,'RAVAOZAFY Catheline',1500,6000],[128,'RAZAFIMAHATRATRA Luc M',1500,6000],[129,'RAZAFIMANANTSOA A. Manambina',0,6000],[130,'RAZAFIMANANTSOA T. Patrick',0,0],[131,'RAZAFINDRAKOTO T. Emmanuel',0,6000],[132,'RAZAFINDRASOA A. Laureanne',0,6000],[133,'RAZAFISOA Jeannine',0,16000],[134,'RAZANADRAKOTO B. Radoniaina',3000,0],[135,'RAZANAPARANY H. Sedera',0,34000],[136,'RAZANATSIMBA F. Safidy',0,10000],[137,'RITSIO N. Harison',0,12000],[138,'SOAVELONARIVO T. M. F. Tiburcie',0,6000],[139,'SOLOFONIAINA V. Aurelice',0,6000],[140,'TAFITARIVONY M. T. Fanelie',0,0],[142,'TSANTA A. Fitahiana',0,0],[143,'TSILAVOHERISOA F. Nomena',1500,6000],[145,'HERITIANA L. Neria',0,0],[147,'RABEARISOA F. Arthur',0,0],[150,'ANDRIAMAHAZO Harena',0,0],[151,'ANDRIAMPARANIAINA M. Frederic',1500,0],[152,'ANDRIANARIJAONA Aina F. J',0,0],[153,'ANDRIANIAINA Hery V',4500,8000],[154,'ANDRIANIRINA F. T. Nandrianina',0,0],[155,'ANDRIATSIHASANDA Gueit C. D',1500,0],[156,'AVOTRINIAINA H. J. Rolland',0,6000],[159,'MBOLANANTENAINA Olivia',0,16000],[162,'NOMENJANAHARY F. Angelin',0,0],[163,'OCCASSI R. F. Tujna',0,6000],[165,'RAHARIVONY S. Vanessa',1500,6000],[167,'RAJAONA Bryan M',0,0],[168,'RAJAONARISON Tsilavirina',0,20000],[170,'RAKOTOMANGA A. Andoniaina',1500,6000],[171,'RAKOTONIAINA Finaritra M',13500,32000],[172,'RAMAHANDRIARIVELO Randja I',4500,6000],[173,'RANAIVOSON Jean Emile',4500,0],[174,'RANDRIAMAMONJISOA Santatriniaina',0,6000],[175,'RANDRIANIAINA F. Sedera',0,0],[177,'RANOMENJANAHARY Francky',3000,20000],[178,'RASAMISON Mario F',0,0],[179,'RASOLOFONIAINA M S. Rodin',3000,0],[181,'RATODINIRINA Sariaka',0,0],[182,'RATSIMANDRESY N. F. Linah',1500,32000],[183,'RATSIMIZAO T. Mampionona',0,0],[184,'RAVELONJARA Youris J',0,0],[185,'RAZAFIMAMONJY T Rinah',0,0],[187,'RAZANAMAMITSARA Jean Kerrinot',0,0],[188,'RAZANAMARIA T. Ormela',0,0],[189,'RAZANAPARANY M. Faharetana',0,6000],[192,'VAOLINIRINA Marie Madeleine',0,8000],[195,'ANDRIAMIHARITIANA Hosea',0,0],[196,'ANDRIANANTENAINA R. M. Jina',0,0],[198,'ANDRIATSILAVINA E. Jean Luc',0,0],[199,'BOTO Ernet',0,0],[206,'RANDRIAMAHERY Jean Frida',0,0],[208,'RANDRIAMBOLA M. Hervé',0,0],[209,'RANDRIANASOLO F. Mendrika',0,0],[212,'RAZANAKOLONA T. Elisée',0,0],[213,'VELOMIASA Florent H',0,0],[214,'VOLOLONTSOA A. Givanio S',0,0],[215,'ANDRIAFANOMEZANTSOA Jeila F',0,6000],[216,'ANDRIAMAHALEO F. Gideona',0,6000],[217,'ANDRIAMIHARISON F Quinnie',1500,0],[218,'ANDRIAMANAHAKA Souza S J',1500,8000],[219,'ANDRIAMANJATO Hajatiana',1500,6000],[220,'ANDRIAMIALISON H. Bien Aime',1500,2000],[221,'ANDRIAMIHAJA Tendry F',1500,8000],[224,'ANDRIANARIVONY Mirado',0,0],[226,'ANDRIANINA T. H. T. Ny Avo',0,0],[229,'ANDRIANTSOA N. Anja M',0,0],[230,'ANDRIARIMALALA Avosoa M',3000,6000],[231,'ANDRIARIMALALA F. Salema',0,16000],[235,'ANDRIAHARINOMBANA Fanasina',0,15000],[236,'ANJARASOLONOMENA Robbie J',4500,16000],[237,'ANTSOMPITIA V. Herizo N',1500,6000],[238,'BAOZANDRY Paza Aldine',3000,12000],[241,'DAY A. S. Alexia',0,6000],[243,'FIONONANA T. Iaro F',1500,6000],[244,'HARITIANA Fanilo',1500,12000],[245,'HASINARIVONY Alain Julio',0,0],[246,'HARILALAINA Manou H',0,2000],[247,'HOBISOA N. Toky',0,0],[248,'INGAHIMENA R. Jacquelas',4500,0],[249,'JAOZANDRY Lee Johnson',0,20000],[250,'JEAN NOMENJANAHARY Safidy',1500,6000],[252,'LEZOMA S. H. V. Fenda',0,0],[253,'LOIUS MARIANE T. Samantha',0,0],[254,'MAHARISOA T. Alain-Gino',0,6000],[258,'MICHELLA Romina S',0,2000],[259,'NAMBININTSOA Jessy Cynthia',1500,6000],[261,'NOMENIAINA L. Claudia',0,8000],[262,'ONJA F. N. Robertinah',1500,60000],[264,'RABARIMANANTSOA S. Harimihaja',1500,6000],[265,'RABEARISOA Tsitohaina',0,0],[266,'RABEMANANJARA M. Ambinintsoa',0,0],[269,'RAFALIARIVONY R. Judichael',0,6000],[270,'RAFALINOMENJANAHARY Setra A',1500,6000],[271,'RAFANJAKANTSOA Arimandimby',0,6000],[272,'RAFANOMEZANTSOA H. Safidy',0,6000],[274,'RAFANOMEZANTSOA Romuald',1500,30000],[275,'RAFANOMEZANTSOA T. J. Olivier',1500,6000],[276,'RAHAJAMANANA N. Patricia',1500,30000],[277,'RAHAMEFIARISOA Fiderana',0,0],[278,'RAHANTSONIRINA N. Ange',1500,0],[279,'RAHARILALAO A. M. Ny Aina',1500,30000],[280,'RAHARINARINDRA S. Fanantenana',1500,2000],[281,'RAHARINIANA Jennifer C',0,26000],[283,'RAHARINIRINA V. Elodie',1500,6000],[284,'RAHARISOA Mialy',1500,6000],[285,'RAHARISON M. Mathieu',9000,6000],[286,'RAHERINDRAINY Antsa R',0,6000],[287,'RAHERINIRINA Diary F',0,4000],[288,'RAHOLIARINIRINA S. Ezinah',1500,8000],[291,'RAJAOSELY M. H. Sylvia',1500,4000],[293,'RAKOTOBE A. Kenny Joselito',0,6000],[295,'RAKOTOMAVO Tsiaronjanahary',0,20000],[296,'RAKOTONANAHARY F. M. Andrea',1500,6000],[297,'RAKOTONANDRASANA Miora N. F',0,6000],[298,'RAKOTONDRABE N. Sebastien',1500,6000],[299,'RAKOTONDRAHAJA H. Elia T',1500,6000],[300,'RAKOTONDRAJAONA Mialisoa F',0,4000],[301,'RAKOTONDRATSIMBA Natolotra',1500,6000],[303,'RAKOTONINDRAINY Miora F',0,6000],[305,'RAKOTOSOA M. H. Faneva',1500,6000],[306,'RALAHIARIMANITRARIVO H. Florie',0,2000],[307,'RALAIHARIMALALA T. Elisa Nicole',1500,6000],[308,'RALANTOTIANA J. H. Clarant',1500,6000],[309,'RALINOMESOA V. Eugelain',1500,6000],[310,'RAMAHANDRIDONA A. Kevin',1500,6000],[311,'RAMALALAHARIVONY Faly N',1500,6000],[312,'RAMANANJATO Antsa Fitia',0,0],[313,'RAMANJAKASON Mahandry T',1500,6000],[314,'RAMASIMANANA N. Tommy',0,0],[316,'RAMIANDRISOA Alfa',1500,6000],[319,'RAMIARIMANANA F. D. Fanantenana',0,14000],[320,'RANDRIAMAHAZOMANANA F. Minosoa',1500,6000],[321,'RANDRIAMALALA A. Koloina',1500,6000],[322,'RANDRIAMANAMPISOA M. Tiana',1500,0],[323,'RANDRIAMANTENA Avotriniaina',13500,52000],[324,'RANDRIAMANGA M. Marinho',1500,6000],[325,'RANDRIAMARIVELO V. Nilaina',0,0],[326,'RANDRIAMAROMANANA H. Fitiavana',1500,12000],[327,'RANDRIAMBOLOLONA N. Ny Avotra N',0,6000],[328,'RANDRIAMIHAJAMANANA Orie Jeniel',0,0],[329,'RANDRIAMIRADO M. Mihaja',0,0],[330,'RANDRIAMISANDRATRA Fanorenantsoa',1500,0],[331,'RANDRIANANTENAINA F. Teddy',0,0],[332,'RANDRIANANTENAINA Santatriniaina',0,6000],[334,'RANDRIANASOLO T. Tafitasoa',1500,6000],[333,'RANDRIANARIVELO S. N. F. Nicolas',3000,6000],[337,"RAOBELOSON NIAINA M. Loryn'ah",1500,28000],[339,'RASOANIRINA H. Gilberte',6000,24000],[341,'RASOARIMINO Mina',0,0],[343,'RASOAZANANY T. Fiderana',1500,6000],[344,'RASOARIVELO Marie Hortense',7500,6000],[345,'RASOLOARIJAONA R. Nathanaël',0,6000],[346,'RASOLOMANANA Tanjoniaina',1500,6000],[348,'RASOLONJANAHARIMANDIMBY Ny Aina',0,6000],[349,'RATEFIARIMALALA Dylan',0,0],[350,'RATOJONIAINA M. Jean Felix',0,6000],[351,'RATOVOHARISOA A. Cedrick',0,0],[353,'RATSIMBAZAFY K. Elia',3000,10000],[354,'RAVALIMANANA T. Joella',7500,6000],[355,'RAVAOARISOA Onjaniaina',1500,6000],[357,'RAVELOARISON S. Miranto',1500,2000],[358,'RAVELONIRINA N. Sarobidy',0,6000],[359,'RAZAELISOA F. Djassemina',0,18000],[360,'RAZAFIMAHATRATRA Oliano',0,4000],[361,'RAZAFIMAHEFA N. Stella',0,12000],[363,'RAZAFINARIVO V. M. Simeon',1500,6000],[364,'RAZAFINDRABE Elysée J. S.',1500,2000],[365,'RAZAFINILAINA F. F. Luc',0,6000],[366,'RAZAFINJATOVO Kanto F',0,2000],[370,'ROBINSON M. Tojonirina',0,0],[371,'TENDRINIAINA Sandafaniriana',4500,6000],[374,'VOLOLONANDRIANINA F. Koloina',0,6000],[375,'VOLOLONIAINA Raissa',1500,6000],[378,'FARANANDRIANINA Jeanniella Aimé',0,0],[380,'MANANTENASOA I. Françoise',0,0],[383,'RAFARALAHY F. Ny Avo I.',0,0],[384,'RAKOTOMALALA Ravonirina Edvint',0,0],[385,'RAKOTOMALALA T. N. Fanomezantsoa',0,0],[389,'RAMINOARITIANA Todisoa',0,0],[390,'RANDRIAMAHEFA Sedra Fitiavana',0,0],[391,'RANDRIAMALALA Fenosoa A.',0,0],[392,'RANIVOARISOA Mélanie',0,0],[393,'RASOLOFOSAONA A. M. Herivony',0,0],[394,'RATSIMBANIAINA J. Y. Joe',0,0],[395,'RATSITOVAH Silo A.',0,0],[396,'RAZAFIARISOA N. Natacha',0,0],[397,'RAZAFIMANDIMBY Mamitiana',0,0]
+];
+
+// Build students array: each student has { num, nom, vals:{actId:amount}, compte, reste }
+let students = rawData.map(r => {
+  const vals = {};
+  vals['cotisation'] = r[2] || 0;
+  vals['cupcake'] = r[3] || 0;
+  return { num: r[0], nom: r[1].trim(), vals };
+});
+
+function getStudentCompte(s) {
+  return activities.reduce((sum, a) => sum + (s.vals[a.id] || 0), 0);
+}
+function getStudentReste(s) {
+  return getTotalCost() - getStudentCompte(s);
+}
+
+let filtered = [];
+
+// ===================== LOGIN =====================
+function selectTab(tab) {
+  selectedTab = tab;
+  document.getElementById('tab-admin').classList.toggle('active', tab === 'admin');
+  document.getElementById('tab-student').classList.toggle('active', tab === 'student');
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('pwd-error').textContent = '';
+}
+
+function checkPwd() {
+  const val = document.getElementById('pwd-input').value;
+  const isAdmin = selectedTab === 'admin' && val === PWD_ADMIN;
+  const isStudent = selectedTab === 'student' && val === PWD_STUDENT;
+
+  if (isAdmin || isStudent) {
+    currentRole = isAdmin ? 'admin' : 'student';
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+
+    // Show/hide admin elements
+    const adminEls = document.querySelectorAll('.admin-only');
+    adminEls.forEach(el => el.style.display = currentRole === 'admin' ? '' : 'none');
+
+    // Role badge
+    const badge = document.getElementById('role-badge');
+    badge.style.display = 'inline-block';
+    if (currentRole === 'admin') {
+      badge.className = 'header-role-badge badge-admin';
+      badge.textContent = '🛡 Administrateur';
+    } else {
+      badge.className = 'header-role-badge badge-student';
+      badge.textContent = '🎓 Accès Étudiant — Lecture seule';
+    }
+
+    renderActivitiesManager();
+    init();
+  } else {
+    const inp = document.getElementById('pwd-input');
+    document.getElementById('pwd-error').textContent = 'Mot de passe incorrect. Réessayez.';
+    inp.classList.add('shake');
+    inp.value = '';
+    setTimeout(() => inp.classList.remove('shake'), 500);
+  }
+}
+
+// ===================== ACTIVITIES =====================
+function renderActivitiesManager() {
+  const grid = document.getElementById('activities-grid');
+  grid.innerHTML = '';
+  activities.forEach(act => {
+    const tag = document.createElement('div');
+    tag.className = 'activity-tag';
+    tag.innerHTML = act.name + (!act.fixed ? '<button onclick="removeActivity(\'' + act.id + '\')" title="Supprimer">✕</button>' : '');
+    grid.appendChild(tag);
+  });
+  // Re-render add modal fields
+  renderModalActivityFields();
+}
+
+function addActivity() {
+  const inp = document.getElementById('new-act-name');
+  const name = inp.value.trim();
+  if (!name) return;
+  const id = 'act_' + Date.now();
+  activities.push({ id, name, fixed: false });
+  // Add this activity val = 0 to all students
+  students.forEach(s => { s.vals[id] = 0; });
+  inp.value = '';
+  renderActivitiesManager();
+  filterTable();
+  renderStats(filtered);
+  updateBanner();
+}
+
+function removeActivity(id) {
+  if (!confirm('Supprimer cette activité ? Les données associées seront perdues.')) return;
+  activities = activities.filter(a => a.id !== id);
+  renderActivitiesManager();
+  filterTable();
+  renderStats(filtered);
+}
+
+function renderModalActivityFields() {
+  const container = document.getElementById('m-activities-fields');
+  container.innerHTML = '';
+  activities.filter(a => a.id !== 'cotisation').forEach(act => {
+    const div = document.createElement('div');
+    div.className = 'form-field';
+    div.innerHTML = '<label>' + act.name + ' (Ar)</label><input type="number" id="m-act-' + act.id + '" value="0" />';
+    container.appendChild(div);
+  });
+}
+
+// ===================== COSTS =====================
+function applyCosts() {
+  COST_MAT = parseInt(document.getElementById('e-mat').value) || 0;
+  COST_SOIR = parseInt(document.getElementById('e-soir').value) || 0;
+  COST_VAR = parseInt(document.getElementById('e-var').value) || 0;
+  updateBanner();
+  renderStats(filtered);
+  filterTable();
+}
+
+function updateBanner() {
+  const total = getTotalCost();
+  let html = '<span class="cost-banner-title">Coût de sortie / étudiant</span>';
+  html += '<span class="cost-item">Total : <strong>' + fmt(total) + ' Ar</strong></span>';
+  html += '<span class="cost-item">Matinée : <strong>' + fmt(COST_MAT) + ' Ar</strong></span>';
+  html += '<span class="cost-item">Soirée fixe : <strong>' + fmt(COST_SOIR) + ' Ar</strong></span>';
+  html += '<span class="cost-item">Soirée variable : <strong>' + fmt(COST_VAR) + ' Ar</strong></span>';
+  document.getElementById('cost-banner').innerHTML = html;
+}
+
+// ===================== STATS =====================
+function renderStats(list) {
+  const total = list.length;
+  const totalCompte = list.reduce((s, x) => s + getStudentCompte(x), 0);
+  const totalReste = list.reduce((s, x) => s + Math.max(0, getStudentReste(x)), 0);
+  const couverts = list.filter(x => getStudentReste(x) <= 0).length;
+  document.getElementById('stats-grid').innerHTML =
+    stat('Étudiants', total, 'dans la base') +
+    stat('Total collecté', fmt(totalCompte) + ' Ar', '') +
+    stat('Reste à collecter', fmt(totalReste) + ' Ar', 'pour la sortie') +
+    stat('Comptes couverts', couverts + ' / ' + total, '');
+}
+
+function stat(label, val, sub) {
+  return '<div class="stat"><div class="stat-label">' + label + '</div><div class="stat-val">' + val + '</div>' + (sub ? '<div class="stat-sub">' + sub + '</div>' : '') + '</div>';
+}
+
+// Fix: use stat-value class for styling
+document.addEventListener('DOMContentLoaded', function(){});
+// patch inline
+function stat(label, val, sub) {
+  return '<div class="stat"><div class="stat-label">' + label + '</div><div class="stat-value">' + val + '</div>' + (sub ? '<div class="stat-sub">' + sub + '</div>' : '') + '</div>';
+}
+
+// ===================== TABLE =====================
+function renderTable(list) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('result-count').textContent = list.length + ' étudiant(s) affiché(s)';
+  const isAdmin = currentRole === 'admin';
+
+  list.forEach((s, i) => {
+    const total = getTotalCost();
+    const compte = getStudentCompte(s);
+    const reste = total - compte;
+    const badge = reste <= 0 ? '<span class="badge badge-ok">Couvert</span>' :
+      compte > 0 ? '<span class="badge badge-partial">Partiel</span>' :
+      '<span class="badge badge-due">À payer</span>';
+    const rClass = reste <= 0 ? 'val-pos' : 'val-neg';
+    const rSign = reste <= 0 ? '−' : '+';
+
+    const tr = document.createElement('tr');
+    tr.className = 'data-row';
+    tr.innerHTML =
+      '<td><button class="expand-btn" title="Voir détail">▸</button></td>' +
+      '<td style="color:#888;font-size:12px">' + s.num + '</td>' +
+      '<td style="font-weight:600;font-size:13px">' + s.nom + '</td>' +
+      '<td class="num">' + fmt(compte) + '</td>' +
+      '<td class="num" style="color:#888">' + fmt(total) + '</td>' +
+      '<td class="num ' + rClass + '">' + rSign + fmt(Math.abs(reste)) + '</td>' +
+      '<td>' + badge + '</td>';
+
+    const detailTr = document.createElement('tr');
+    detailTr.className = 'detail-row';
+    detailTr.id = 'detail-' + i;
+
+    // Detail cards
+    const excedent = reste < 0 ? '<div class="dc-sub">Excédent : ' + fmt(Math.abs(reste)) + ' Ar</div>' : '';
+    let detailCards = '<div class="detail-card"><div class="dc-label">N° Étudiant</div><div class="dc-val">#' + s.num + '</div></div>';
+    activities.forEach(act => {
+      detailCards += '<div class="detail-card"><div class="dc-label">' + act.name + '</div><div class="dc-val">' + fmt(s.vals[act.id] || 0) + ' Ar</div></div>';
+    });
+    detailCards += '<div class="detail-card"><div class="dc-label">Total Compte</div><div class="dc-val">' + fmt(compte) + ' Ar</div></div>';
+    detailCards += '<div class="detail-card"><div class="dc-label">Coût Sortie</div><div class="dc-val">' + fmt(total) + ' Ar</div></div>';
+    detailCards += '<div class="detail-card"><div class="dc-label">Solde</div><div class="dc-val ' + rClass + '">' + (reste <= 0 ? '✓ Couvert' : fmt(reste) + ' Ar dû') + '</div>' + excedent + '</div>';
+
+    // Edit inline (admin only)
+    let editSection = '';
+    if (isAdmin) {
+      let actInputs = '<label>N°</label><input class="num-input" id="en-' + i + '" type="number" value="' + s.num + '" />';
+      actInputs += '<label>Nom</label><input class="name-input" id="enom-' + i + '" type="text" value="' + s.nom + '" />';
+      activities.forEach(act => {
+        actInputs += '<label>' + act.name + '</label><input id="ea-' + act.id + '-' + i + '" type="number" value="' + (s.vals[act.id] || 0) + '" />';
+      });
+      actInputs += '<button class="btn-save" onclick="saveRow(' + i + ')">Enregistrer</button>';
+      actInputs += '<button class="btn-delete" onclick="deleteRow(' + i + ')">Supprimer</button>';
+      editSection = '<div class="edit-inline">' + actInputs + '</div>';
+    }
+
+    detailTr.innerHTML = '<td colspan="7"><div class="detail-grid">' + detailCards + '</div>' + editSection + '</td>';
+
+    tbody.appendChild(tr);
+    tbody.appendChild(detailTr);
+
+    const btn = tr.querySelector('.expand-btn');
+    function toggle() {
+      const detail = document.getElementById('detail-' + i);
+      const open = detail.style.display === 'table-row';
+      detail.style.display = open ? 'none' : 'table-row';
+      btn.textContent = open ? '▸' : '▾';
+    }
+    btn.addEventListener('click', e => { e.stopPropagation(); toggle(); });
+    tr.addEventListener('click', toggle);
+  });
+}
+
+function saveRow(i) {
+  const s = filtered[i];
+  s.num = parseInt(document.getElementById('en-' + i).value) || s.num;
+  s.nom = document.getElementById('enom-' + i).value.trim() || s.nom;
+  activities.forEach(act => {
+    const inp = document.getElementById('ea-' + act.id + '-' + i);
+    if (inp) s.vals[act.id] = parseInt(inp.value) || 0;
+  });
+  filterTable();
+}
+
+function deleteRow(i) {
+  const s = filtered[i];
+  if (confirm('Supprimer ' + s.nom + ' ?')) {
+    students = students.filter(x => x !== s);
+    filterTable();
+    renderStats(students);
+  }
+}
+
+function filterTable() {
+  const q = (document.getElementById('search').value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const status = document.getElementById('filter-status').value;
+  filtered = students.filter(s => {
+    const nm = s.nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const matchQ = !q || nm.includes(q) || String(s.num).includes(q);
+    const reste = getStudentReste(s);
+    const matchS = status === 'all' || (status === 'ok' && reste <= 0) || (status === 'due' && reste > 0);
+    return matchQ && matchS;
+  });
+  renderStats(filtered);
+  renderTable(filtered);
+}
+
+// ===================== ADD MODAL =====================
+function openAddModal() {
+  renderModalActivityFields();
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+function addStudent() {
+  const num = parseInt(document.getElementById('m-num').value);
+  const nom = document.getElementById('m-nom').value.trim();
+  const cot = parseInt(document.getElementById('m-cot').value) || 0;
+  if (!nom) { alert('Le nom est obligatoire.'); return; }
+
+  const vals = {};
+  vals['cotisation'] = cot;
+  activities.filter(a => a.id !== 'cotisation').forEach(act => {
+    const inp = document.getElementById('m-act-' + act.id);
+    vals[act.id] = inp ? (parseInt(inp.value) || 0) : 0;
+  });
+
+  students.push({ num, nom, vals });
+  closeAddModal();
+  document.getElementById('m-num').value = '';
+  document.getElementById('m-nom').value = '';
+  document.getElementById('m-cot').value = '0';
+  filterTable();
+}
+
+document.getElementById('add-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+
+// ===================== INIT =====================
+function init() {
+  updateBanner();
+  filterTable();
+}
+</script>
+</body>
+</html>
