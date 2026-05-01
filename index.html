@@ -639,7 +639,7 @@ function checkPwd() {
 
     // Show/hide admin elements
     const adminEls = document.querySelectorAll('.admin-only');
-    adminEls.forEach(el => el.style.display = currentRole === 'admin' ? '' : 'none');
+    adminEls.forEach(el => el.style.display = currentRole === 'admin' ? 'block' : 'none');
 
     // Role badge
     const badge = document.getElementById('role-badge');
